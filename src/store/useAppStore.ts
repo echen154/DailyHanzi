@@ -9,7 +9,6 @@ import {
   withHistoryEntry,
   withToggledFavorite,
   withToggledLearned,
-  withReport,
   withMergedWidgetHistory,
 } from '../storage/userDataOperations';
 import { selectNextPhrase } from '../engine/phraseSelector';
@@ -24,12 +23,24 @@ interface AppState {
   currentPhrase: Phrase | null;
 
   initialize: () => Promise<void>;
+  /** Pulls in phrases the widget showed on its own since the last sync (iOS Lock Screen widget only). */
+  refreshFromWidget: () => Promise<void>;
   nextPhrase: () => Promise<void>;
   toggleFavorite: (phraseId: string) => Promise<void>;
   toggleLearned: (phraseId: string) => Promise<void>;
-  reportPhrase: (phraseId: string, reason: string) => Promise<void>;
   updateSettings: (partial: Partial<Settings>) => Promise<void>;
   completeOnboarding: (hskLevel: Settings['hskLevel'], frequencyMinutes: FrequencyMinutes) => Promise<void>;
+}
+
+/**
+ * Folds in phrases the widget displayed on its own since the last time the
+ * app checked (iOS Lock Screen widget only — a no-op on Android, which has
+ * no widget at all). Returns the same object reference when there's nothing
+ * new, so callers can skip redundant writes.
+ */
+async function mergeWidgetOriginatedChanges(userData: UserData): Promise<UserData> {
+  const widgetEntries = await WidgetBridge.getWidgetHistory();
+  return widgetEntries.length > 0 ? withMergedWidgetHistory(userData, widgetEntries, Date.now()) : userData;
 }
 
 function syncWidget(settings: Settings, userData: UserData) {
@@ -65,12 +76,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   initialize: async () => {
     const [settings, storedUserData] = await Promise.all([loadSettings(), loadUserData()]);
-
-    const widgetEntries = await WidgetBridge.getWidgetHistory();
-    const userData =
-      widgetEntries.length > 0
-        ? withMergedWidgetHistory(storedUserData, widgetEntries, Date.now())
-        : storedUserData;
+    const userData = await mergeWidgetOriginatedChanges(storedUserData);
 
     let currentPhrase = userData.currentPhraseId ? getPhraseById(userData.currentPhraseId) ?? null : null;
     let finalUserData = userData;
@@ -95,6 +101,15 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     set({ settings, userData: finalUserData, currentPhrase, isLoading: false });
     syncWidget(settings, finalUserData);
+  },
+
+  refreshFromWidget: async () => {
+    const { settings, userData } = get();
+    const merged = await mergeWidgetOriginatedChanges(userData);
+    if (merged === userData) return;
+    set({ userData: merged });
+    await saveUserData(merged);
+    syncWidget(settings, merged);
   },
 
   nextPhrase: async () => {
@@ -126,13 +141,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleLearned: async (phraseId: string) => {
     const { userData } = get();
     const nextUserData = withToggledLearned(userData, phraseId);
-    set({ userData: nextUserData });
-    await saveUserData(nextUserData);
-  },
-
-  reportPhrase: async (phraseId: string, reason: string) => {
-    const { userData } = get();
-    const nextUserData = withReport(userData, phraseId, reason, Date.now());
     set({ userData: nextUserData });
     await saveUserData(nextUserData);
   },

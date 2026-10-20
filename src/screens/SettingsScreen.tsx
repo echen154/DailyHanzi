@@ -5,7 +5,8 @@ import { useTheme } from '../theme/ThemeProvider';
 import { typography } from '../theme/typography';
 import { useAppStore } from '../store/useAppStore';
 import { OptionList } from '../components/OptionList';
-import { HSK_OPTIONS, FREQUENCY_OPTIONS } from '../types/settings';
+import { HskMultiSelect } from '../components/HskMultiSelect';
+import { FREQUENCY_OPTIONS } from '../types/settings';
 
 const ACTIVE_HOURS_PRESETS: { value: string; label: string; start: number; end: number }[] = [
   { value: 'all-day', label: 'All day (24 hours)', start: 0, end: 24 },
@@ -60,31 +61,35 @@ export function SettingsScreen() {
         <Text style={[typography.title, { color: palette.textPrimary }]}>Settings</Text>
 
         <SectionLabel>CHINESE LEVEL</SectionLabel>
-        <OptionList
-          options={HSK_OPTIONS}
-          value={settings.hskLevel}
-          onChange={value => updateSettings({ hskLevel: value })}
-        />
-
-        <SectionLabel>PHRASE FREQUENCY</SectionLabel>
-        <OptionList
-          options={FREQUENCY_OPTIONS}
-          value={settings.frequencyMinutes}
-          onChange={value => updateSettings({ frequencyMinutes: value })}
-        />
-        <Text style={[typography.caption, styles.footnote, { color: palette.textTertiary }]}>
-          {Platform.OS === 'ios'
-            ? 'iOS batches widget refreshes for battery life, so updates land close to — but not always exactly at — this interval.'
-            : 'Android may delay updates slightly under battery optimization (Doze), so updates land close to — but not always exactly at — this interval.'}
+        <Text style={[typography.caption, styles.footnote, { color: palette.textTertiary, marginTop: 0, marginBottom: 10 }]}>
+          Pick "Mixed" for every level, or check any combination of levels to study together.
         </Text>
+        <HskMultiSelect value={settings.hskLevel} onChange={value => updateSettings({ hskLevel: value })} />
+
+        {Platform.OS === 'ios' && (
+          <>
+            <SectionLabel>PHRASE FREQUENCY</SectionLabel>
+            <OptionList
+              options={FREQUENCY_OPTIONS}
+              value={settings.frequencyMinutes}
+              onChange={value => updateSettings({ frequencyMinutes: value })}
+            />
+            <Text style={[typography.caption, styles.footnote, { color: palette.textTertiary }]}>
+              iOS batches Lock Screen widget refreshes for battery life, so updates land close to — but not
+              always exactly at — this interval.
+            </Text>
+          </>
+        )}
 
         <SectionLabel>DISPLAY</SectionLabel>
-        <ToggleRow
-          label="Home-screen widget"
-          description="Turn off to stop the widget from refreshing"
-          value={settings.widgetEnabled}
-          onChange={value => updateSettings({ widgetEnabled: value })}
-        />
+        {Platform.OS === 'ios' && (
+          <ToggleRow
+            label="Lock Screen widget"
+            description="Turn off to stop the widget from refreshing"
+            value={settings.widgetEnabled}
+            onChange={value => updateSettings({ widgetEnabled: value })}
+          />
+        )}
         <ToggleRow
           label="Traditional Chinese"
           description="Show traditional characters instead of simplified"
@@ -102,18 +107,25 @@ export function SettingsScreen() {
           onChange={value => updateSettings({ showDefinition: value })}
         />
 
-        <SectionLabel>ACTIVE HOURS</SectionLabel>
-        <Text style={[typography.caption, styles.footnote, { color: palette.textTertiary, marginTop: 0, marginBottom: 10 }]}>
-          The widget only refreshes with a new phrase during these hours, so you won't get one at 3 AM.
-        </Text>
-        <OptionList
-          options={ACTIVE_HOURS_PRESETS.map(p => ({ value: p.value, label: p.label }))}
-          value={activeHoursPresetValue(settings.activeHoursStart, settings.activeHoursEnd)}
-          onChange={value => {
-            const preset = ACTIVE_HOURS_PRESETS.find(p => p.value === value);
-            if (preset) updateSettings({ activeHoursStart: preset.start, activeHoursEnd: preset.end });
-          }}
-        />
+        {Platform.OS === 'ios' && (
+          <>
+            <SectionLabel>ACTIVE HOURS</SectionLabel>
+            <Text
+              style={[typography.caption, styles.footnote, { color: palette.textTertiary, marginTop: 0, marginBottom: 10 }]}
+            >
+              The Lock Screen widget only refreshes with a new phrase during these hours, so you won't get
+              one at 3 AM.
+            </Text>
+            <OptionList
+              options={ACTIVE_HOURS_PRESETS.map(p => ({ value: p.value, label: p.label }))}
+              value={activeHoursPresetValue(settings.activeHoursStart, settings.activeHoursEnd)}
+              onChange={value => {
+                const preset = ACTIVE_HOURS_PRESETS.find(p => p.value === value);
+                if (preset) updateSettings({ activeHoursStart: preset.start, activeHoursEnd: preset.end });
+              }}
+            />
+          </>
+        )}
 
         <SectionLabel>APPEARANCE</SectionLabel>
         <OptionList

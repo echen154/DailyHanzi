@@ -1,5 +1,5 @@
 import { Phrase } from '../types/phrase';
-import raw from './phrases.json';
+import raw from './phraseData.json';
 
 /** The full bundled phrase database. Offline-first: no network fetch, ever. */
 export const ALL_PHRASES: Phrase[] = raw as Phrase[];

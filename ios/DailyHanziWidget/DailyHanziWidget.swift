@@ -1,6 +1,9 @@
 import WidgetKit
 import SwiftUI
 
+/// This widget is Lock Screen–only by design — see PhraseWidgetView.swift
+/// for why `supportedFamilies` lists only the accessory (Lock Screen)
+/// families, never the Home Screen sizes.
 struct DailyHanziWidget: Widget {
     let kind: String = "DailyHanziWidget"
 
@@ -9,8 +12,8 @@ struct DailyHanziWidget: Widget {
             PhraseWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Daily Hanzi")
-        .description("A new Chinese phrase, right on your home screen.")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .description("A new Chinese phrase, right on your Lock Screen.")
+        .supportedFamilies([.accessoryRectangular, .accessoryCircular, .accessoryInline])
     }
 }
 

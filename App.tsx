@@ -1,6 +1,6 @@
 /**
  * Daily Hanzi
- * Passive Chinese-learning app with a home-screen widget.
+ * Chinese-learning app with an iOS Lock Screen widget for passive learning.
  *
  * @format
  */
@@ -12,9 +12,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAppStore } from './src/store/useAppStore';
-import { WidgetBridge } from './src/native/WidgetBridge';
-import { withMergedWidgetHistory } from './src/storage/userDataOperations';
-import { saveUserData } from './src/storage/userDataRepository';
 
 function LoadingScreen() {
   const { palette } = useTheme();
@@ -31,25 +28,21 @@ function AppContent() {
   const appStateRef = useRef<AppStateStatus>((AppState.currentState as AppStateStatus) ?? 'active');
 
   useEffect(() => {
-    initialize();
+    initialize().catch(err => {
+      console.error('[DailyHanzi] initialize() failed:', err);
+    });
   }, [initialize]);
 
-  // Every time the app comes back to the foreground, pull in any phrases the
-  // native widget selected on its own while we were closed, so History stays
-  // a complete record of the passive-learning experience.
+  // Every time the app comes back to the foreground, pull in anything the
+  // native widget did on its own while we were closed — phrases it selected
+  // (History stays a complete record) and "mark learned" taps made directly
+  // on the widget — so the app never shows stale state.
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async nextState => {
       const cameToForeground = appStateRef.current.match(/inactive|background/) && nextState === 'active';
       appStateRef.current = nextState;
       if (!cameToForeground) return;
-
-      const widgetEntries = await WidgetBridge.getWidgetHistory();
-      if (widgetEntries.length === 0) return;
-
-      const { userData } = useAppStore.getState();
-      const merged = withMergedWidgetHistory(userData, widgetEntries, Date.now());
-      useAppStore.setState({ userData: merged });
-      await saveUserData(merged);
+      await useAppStore.getState().refreshFromWidget();
     });
     return () => subscription.remove();
   }, []);

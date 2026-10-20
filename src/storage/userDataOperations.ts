@@ -1,4 +1,4 @@
-import { UserData, MAX_HISTORY_ENTRIES, HistoryEntry, ReportEntry } from '../types/state';
+import { UserData, MAX_HISTORY_ENTRIES, HistoryEntry } from '../types/state';
 
 /** Pure helpers over UserData. No I/O here, which keeps them trivial to unit test. */
 
@@ -30,11 +30,6 @@ export function withToggledLearned(data: UserData, phraseId: string): UserData {
       ? data.learnedIds.filter(id => id !== phraseId)
       : [...data.learnedIds, phraseId],
   };
-}
-
-export function withReport(data: UserData, phraseId: string, reason: string, now: number): UserData {
-  const report: ReportEntry = { phraseId, reason, reportedAt: now };
-  return { ...data, reports: [report, ...data.reports] };
 }
 
 /**

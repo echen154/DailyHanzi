@@ -19,7 +19,7 @@
     "@react-navigation/bottom-tabs": "^7.3.9",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.10.0",
-    "react-native-gesture-handler": "^2.24.0",
+    "react-native-gesture-handler": "^3.3.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

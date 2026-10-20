@@ -30,5 +30,22 @@ target 'DailyHanzi' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Some pods (e.g. RNCAsyncStorage's resource-bundle target) ship an older
+    # minimum iOS version in their own podspec than this project's — and
+    # newer Xcode releases drop support for building against very old
+    # deployment targets, which turns into a red "deployment target ... is
+    # not in the range of supported versions" error on that pod's target
+    # specifically, separate from the main app target (which already sets
+    # its own target explicitly and doesn't hit this). Raising every pod's
+    # floor to match the app's `min_ios_version_supported` closes that gap.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        deployment_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if deployment_target && Gem::Version.new(deployment_target) < Gem::Version.new(min_ios_version_supported)
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+        end
+      end
+    end
   end
 end

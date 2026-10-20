@@ -34,8 +34,17 @@ function sequence(...values: number[]): () => number {
 
 describe('filterByLevel', () => {
   it('restricts the pool to a single HSK level', () => {
-    const result = filterByLevel(allPhrases, 2);
+    const result = filterByLevel(allPhrases, [2]);
     expect(result.map(p => p.id).sort()).toEqual(['b1', 'b2', 'b3']);
+  });
+
+  it('restricts the pool to any combination of selected HSK levels', () => {
+    const result = filterByLevel(allPhrases, [1, 2]);
+    expect(result).toHaveLength(allPhrases.length);
+  });
+
+  it('returns nothing when the level array is empty', () => {
+    expect(filterByLevel(allPhrases, [])).toHaveLength(0);
   });
 
   it('returns every phrase for "mixed"', () => {
@@ -62,7 +71,7 @@ describe('selectNextPhrase - difficulty filtering', () => {
     for (let trial = 0; trial < 25; trial++) {
       const phrase = selectNextPhrase({
         phrases: allPhrases,
-        level: 1,
+        level: [1],
         history: [],
         favoriteIds: [],
         learnedIds: [],
@@ -70,6 +79,23 @@ describe('selectNextPhrase - difficulty filtering', () => {
       });
       expect(phrase?.hskLevel).toBe(1);
     }
+  });
+
+  it('draws from every selected level when multiple HSK levels are chosen', () => {
+    const seen = new Set<string>();
+    for (let trial = 0; trial < 40; trial++) {
+      const phrase = selectNextPhrase({
+        phrases: allPhrases,
+        level: [1, 2],
+        history: [],
+        favoriteIds: [],
+        learnedIds: [],
+        random: () => trial / 40,
+      });
+      if (phrase) seen.add(phrase.id);
+    }
+    expect([...seen].some(id => id.startsWith('a'))).toBe(true);
+    expect([...seen].some(id => id.startsWith('b'))).toBe(true);
   });
 
   it('draws from the whole pool when level is "mixed"', () => {
@@ -92,7 +118,7 @@ describe('selectNextPhrase - difficulty filtering', () => {
   it('returns null when no phrase matches the level', () => {
     const phrase = selectNextPhrase({
       phrases: allPhrases,
-      level: 6,
+      level: [6],
       history: [],
       favoriteIds: [],
       learnedIds: [],
@@ -111,7 +137,7 @@ describe('selectNextPhrase - avoiding recent repeats', () => {
     for (let trial = 0; trial < 30; trial++) {
       const phrase = selectNextPhrase({
         phrases: hsk1,
-        level: 1,
+        level: [1],
         history,
         favoriteIds: [],
         learnedIds: [],
@@ -125,7 +151,7 @@ describe('selectNextPhrase - avoiding recent repeats', () => {
     for (let trial = 0; trial < 30; trial++) {
       const phrase = selectNextPhrase({
         phrases: hsk1,
-        level: 1,
+        level: [1],
         history: [],
         favoriteIds: [],
         learnedIds: [],
@@ -140,7 +166,7 @@ describe('selectNextPhrase - avoiding recent repeats', () => {
     const single = [makePhrase('only', 1)];
     const phrase = selectNextPhrase({
       phrases: single,
-      level: 1,
+      level: [1],
       history: [{ phraseId: 'only', shownAt: 1 }],
       favoriteIds: [],
       learnedIds: [],
@@ -162,7 +188,7 @@ describe('selectNextPhrase - avoiding recent repeats', () => {
     ];
     const phrase = selectNextPhrase({
       phrases: hsk1,
-      level: 1,
+      level: [1],
       history,
       favoriteIds: [],
       learnedIds: [],
@@ -181,7 +207,7 @@ describe('selectNextPhrase - favorites and reinforcement weighting', () => {
     const pickAt = (r: number) =>
       selectNextPhrase({
         phrases: pool,
-        level: 1,
+        level: [1],
         history: [],
         favoriteIds: ['fav'],
         learnedIds: [],
@@ -198,7 +224,7 @@ describe('selectNextPhrase - favorites and reinforcement weighting', () => {
     const pickAt = (r: number) =>
       selectNextPhrase({
         phrases: pool,
-        level: 1,
+        level: [1],
         history: [],
         favoriteIds: [],
         learnedIds: ['learned'],

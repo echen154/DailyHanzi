@@ -2,7 +2,6 @@ import {
   withHistoryEntry,
   withToggledFavorite,
   withToggledLearned,
-  withReport,
   withMergedWidgetHistory,
 } from '../userDataOperations';
 import { EMPTY_USER_DATA, MAX_HISTORY_ENTRIES } from '../../types/state';
@@ -45,13 +44,6 @@ describe('withToggledLearned', () => {
     expect(marked.learnedIds).toContain('p1');
     const unmarked = withToggledLearned(marked, 'p1');
     expect(unmarked.learnedIds).not.toContain('p1');
-  });
-});
-
-describe('withReport', () => {
-  it('prepends a report entry with the given reason and timestamp', () => {
-    const result = withReport(EMPTY_USER_DATA, 'p1', 'Wrong translation', 1234);
-    expect(result.reports).toEqual([{ phraseId: 'p1', reason: 'Wrong translation', reportedAt: 1234 }]);
   });
 });
 

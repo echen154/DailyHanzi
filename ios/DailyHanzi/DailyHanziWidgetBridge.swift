@@ -24,9 +24,15 @@ class DailyHanziWidgetBridge: NSObject {
             let settings = payload["settings"] as? [String: Any]
         else { return }
 
+        // hskLevel arrives either as the string "mixed" or as a JSON array of
+        // HSK level numbers (e.g. [2, 3]) for a multi-level selection. Stored
+        // here as "mixed" or a comma-joined list ("2,3") — see
+        // PhraseSelector.filterByLevel for the matching parser.
         let hskLevel: String
         if let raw = settings["hskLevel"] as? String {
             hskLevel = raw
+        } else if let raw = settings["hskLevel"] as? [NSNumber] {
+            hskLevel = raw.map { $0.stringValue }.joined(separator: ",")
         } else if let raw = settings["hskLevel"] as? NSNumber {
             hskLevel = raw.stringValue
         } else {

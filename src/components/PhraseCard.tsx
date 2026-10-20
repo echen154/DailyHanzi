@@ -29,7 +29,7 @@ export function PhraseCard({
     <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
       <View style={styles.header}>
         <HskBadge level={phrase.hskLevel} />
-        <Text style={[styles.topic, { color: palette.textTertiary }]}>{phrase.topic}</Text>
+        <Text style={[styles.topic, { color: palette.textTertiary }]}>· {phrase.topic}</Text>
       </View>
 
       <Text
@@ -85,7 +85,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    gap: 6,
+    // Left-aligned deliberately: HomeScreen overlays small favorite/learned
+    // icons in the card's top-right corner, so nothing here should compete
+    // for that space.
     marginBottom: 20,
   },
   topic: {

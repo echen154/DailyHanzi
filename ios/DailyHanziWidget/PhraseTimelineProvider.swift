@@ -6,6 +6,11 @@ struct PhraseEntry: TimelineEntry {
     let scriptMode: String
     let showPinyin: Bool
     let showDefinition: Bool
+    /// Display-only, for the small status glyphs in AccessoryRectangularView —
+    /// there is no way to toggle these from the widget itself (see that
+    /// view's doc comment for why).
+    let isFavorite: Bool
+    let isLearned: Bool
 }
 
 /// Drives the widget's content and refresh schedule.
@@ -110,7 +115,9 @@ struct PhraseTimelineProvider: TimelineProvider {
             phrase: phrase,
             scriptMode: settings.scriptMode,
             showPinyin: settings.showPinyin,
-            showDefinition: settings.showDefinition
+            showDefinition: settings.showDefinition,
+            isFavorite: phrase.map { SharedStore.favoriteIds.contains($0.id) } ?? false,
+            isLearned: phrase.map { SharedStore.learnedIds.contains($0.id) } ?? false
         )
     }
 

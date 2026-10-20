@@ -15,10 +15,14 @@ enum PhraseSelector {
     private static let unseenWeightMultiplier = 1.3
     private static let maxCooldownIds = 30
 
+    /// `hskLevel` is either "mixed" or a comma-joined list of one or more HSK
+    /// level numbers (e.g. "2,3") — see DailyHanziWidgetBridge.swift, which
+    /// is what encodes the JS side's `HskLevel[] | 'mixed'` into this string.
     static func filterByLevel(_ phrases: [Phrase], hskLevel: String) -> [Phrase] {
         guard hskLevel != "mixed" else { return phrases }
-        guard let level = Int(hskLevel) else { return phrases }
-        return phrases.filter { $0.hskLevel == level }
+        let levels = Set(hskLevel.split(separator: ",").compactMap { Int($0) })
+        guard !levels.isEmpty else { return [] }
+        return phrases.filter { levels.contains($0.hskLevel) }
     }
 
     private static func cooldownSize(poolSize: Int) -> Int {

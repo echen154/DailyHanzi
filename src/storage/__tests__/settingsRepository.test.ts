@@ -4,7 +4,7 @@ import {
   saveSettings,
   SETTINGS_STORAGE_KEY,
 } from '../settingsRepository';
-import { DEFAULT_SETTINGS } from '../../types/settings';
+import { DEFAULT_SETTINGS, Settings } from '../../types/settings';
 
 describe('settingsRepository', () => {
   beforeEach(async () => {
@@ -17,7 +17,7 @@ describe('settingsRepository', () => {
   });
 
   it('persists settings and reloads the same values', async () => {
-    const updated = { ...DEFAULT_SETTINGS, hskLevel: 3 as const, frequencyMinutes: 60 as const };
+    const updated: Settings = { ...DEFAULT_SETTINGS, hskLevel: [3], frequencyMinutes: 60 };
     await saveSettings(updated);
     const reloaded = await loadSettings();
     expect(reloaded).toEqual(updated);
@@ -25,11 +25,11 @@ describe('settingsRepository', () => {
 
   it('merges saved data onto current defaults, so a future app update that adds a field never crashes', async () => {
     // Simulate an older, smaller settings blob missing a field this version expects.
-    const legacyBlob = { hskLevel: 2, frequencyMinutes: 120 };
+    const legacyBlob = { hskLevel: [2], frequencyMinutes: 120 };
     await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(legacyBlob));
 
     const reloaded = await loadSettings();
-    expect(reloaded.hskLevel).toBe(2);
+    expect(reloaded.hskLevel).toEqual([2]);
     expect(reloaded.frequencyMinutes).toBe(120);
     expect(reloaded.showPinyin).toBe(DEFAULT_SETTINGS.showPinyin);
     expect(reloaded.theme).toBe(DEFAULT_SETTINGS.theme);

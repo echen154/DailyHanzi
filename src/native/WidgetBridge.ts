@@ -5,17 +5,15 @@ import { HistoryEntry } from '../types/state';
 /**
  * Bridge to the native widget support module.
  *
- * There is one native implementation per platform:
- *  - iOS: ios/DailyHanzi/DailyHanziWidgetBridge.swift (+ .m exporter), backed
- *    by an App Group shared UserDefaults suite that the WidgetKit extension
- *    reads from directly.
- *  - Android: android/app/.../widget/DailyHanziWidgetBridgeModule.kt, backed
- *    by a SharedPreferences file the AppWidgetProvider/WorkManager worker
- *    read directly (Android widgets run in the same process as the app, so
- *    no App-Group-style container is needed).
- *
- * Both expose the exact same three methods, so this file is the only place
- * JS needs to know about the native bridge at all.
+ * iOS only: ios/DailyHanzi/DailyHanziWidgetBridge.swift (+ .m exporter),
+ * backed by an App Group shared UserDefaults suite that the WidgetKit
+ * extension (a Lock Screen widget — see ios/DailyHanziWidget/) reads from
+ * directly. There is no Android counterpart: Android has no Lock Screen
+ * widget API (removed in Android 5.0 and never restored), and this app
+ * deliberately has no Home Screen widget on either platform, so on Android
+ * `NativeModules.DailyHanziWidgetBridge` is simply undefined and every
+ * method below no-ops — the app works the same either way, just without a
+ * home-screen/lock-screen surface on Android.
  */
 
 export interface WidgetSettingsSnapshot {

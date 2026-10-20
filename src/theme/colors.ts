@@ -20,9 +20,9 @@ export const lightPalette: Palette = {
   textPrimary: '#1C1B19',
   textSecondary: '#5B5952',
   textTertiary: '#8B887F',
-  accent: '#2F6F5E',
-  accentSoft: '#E4F0EB',
-  danger: '#B3453A',
+  accent: '#B3453A',
+  accentSoft: '#F3E3DB',
+  danger: '#C4432E',
   onAccent: '#FFFFFF',
 };
 
@@ -34,8 +34,8 @@ export const darkPalette: Palette = {
   textPrimary: '#F3F1EB',
   textSecondary: '#B7B4AB',
   textTertiary: '#807D74',
-  accent: '#6FBF9E',
-  accentSoft: '#1E2E29',
-  danger: '#E27367',
-  onAccent: '#0D1F1A',
+  accent: '#E08A74',
+  accentSoft: '#2E201B',
+  danger: '#E8947A',
+  onAccent: '#2A140F',
 };

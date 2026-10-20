@@ -41,7 +41,8 @@ const MAX_COOLDOWN_IDS = 30;
 
 export function filterByLevel(phrases: Phrase[], level: LevelFilter): Phrase[] {
   if (level === 'mixed') return phrases;
-  return phrases.filter(p => p.hskLevel === level);
+  const levels = new Set(level);
+  return phrases.filter(p => levels.has(p.hskLevel));
 }
 
 /** Most-recently-shown distinct phrase ids, most recent first. */

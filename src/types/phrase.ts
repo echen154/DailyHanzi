@@ -6,8 +6,12 @@
  */
 export type HskLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
-/** The user-facing difficulty filter. 'mixed' removes the HSK filter entirely. */
-export type LevelFilter = HskLevel | 'mixed';
+/**
+ * The user-facing difficulty filter. 'mixed' removes the HSK filter
+ * entirely; an array lets the user opt into any combination of levels
+ * (e.g. [2, 3] to study HSK 2 and 3 phrases together).
+ */
+export type LevelFilter = HskLevel[] | 'mixed';
 
 export interface Phrase {
   /** Stable, unique identifier. Never reuse or renumber across releases. */

@@ -116,9 +116,4 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-
-    // Home-screen widget: WorkManager drives the scheduled background refresh
-    // (see PhraseRefreshWorker); org.json for parsing the bundled phrase
-    // dataset ships with the Android SDK and needs no dependency entry.
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
 }
